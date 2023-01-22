@@ -1,4 +1,5 @@
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from scripts.processing import bayes_classification_processing
 import pandas as pd
@@ -9,7 +10,11 @@ from sklearn.metrics import classification_report
 ## I can use the shape value to understand the actual 
 
 
-def random_forest_model(X, y):
+def random_forest_model(X, y, variables=None):
+    
+    if variables != None:
+        X=X[variables]
+        
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 42)
     rfc = RandomForestClassifier(random_state=0)
     rfc.fit(X_train, y_train)
