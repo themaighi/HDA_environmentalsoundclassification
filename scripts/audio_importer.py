@@ -46,6 +46,8 @@ class Clip:
             self._compute_mfcc(audio)    
             self._compute_zcr(audio)
             self._compute_energy(audio)
+            self._compute_delta(self.mfcc)
+            self._compute_delta_delta(self.mfcc)
             
     def _compute_mfcc(self, audio):
         # MFCC computation with default settings (2048 FFT window length, 512 hop length, 128 bands)
@@ -75,7 +77,13 @@ class Clip:
         for i in range(0, frames):
             frame = Clip._get_frame(audio, i)
             self.energy.append(sum((frame**2)))
-            
+    
+    def _compute_delta(self, mfcc):
+        self.delta = librosa.feature.delta(mfcc, order=1)
+    
+    def _compute_delta_delta(self, mfcc):
+        self.delta_delta = librosa.feature.delta(mfcc, order=2)
+
     @classmethod
     def _get_frame(cls, audio, index):
         if index < 0:
