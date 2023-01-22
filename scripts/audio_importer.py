@@ -79,10 +79,10 @@ class Clip:
             self.energy.append(sum((frame**2)))
     
     def _compute_delta(self, mfcc):
-        self.delta = librosa.feature.delta(mfcc, order=1)
+        self.delta = librosa.feature.delta(mfcc.transpose(), order=1).transpose()
     
     def _compute_delta_delta(self, mfcc):
-        self.delta_delta = librosa.feature.delta(mfcc, order=2)
+        self.delta_delta = librosa.feature.delta(mfcc.transpose(), order=2).transpose()
 
     @classmethod
     def _get_frame(cls, audio, index):

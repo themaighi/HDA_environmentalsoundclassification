@@ -8,7 +8,10 @@ def general_processing(dt):
     for j, audio in enumerate(dt['audio']):
         mfcc = pd.DataFrame(audio.mfcc, columns=['mfcc_' + str(k) for k in range(audio.mfcc.shape[1])])
         zcr = pd.DataFrame({'zcr': audio.zcr})
-        var_dt = pd.concat([mfcc, zcr], axis=1)
+        energy = pd.DataFrame({'energy': audio.energy})
+        delta = pd.DataFrame(audio.delta, columns=['delta_' + str(k) for k in range(audio.delta.shape[1])])
+        delta2 = pd.DataFrame(audio.delta, columns=['delta2_' + str(k) for k in range(audio.delta_delta.shape[1])])
+        var_dt = pd.concat([mfcc, zcr, energy, delta, delta2], axis=1)
         dt['audio'][j].x_df = var_dt
 
     return dt
