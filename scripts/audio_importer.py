@@ -45,6 +45,7 @@ class Clip:
         with self.audio as audio:
             self._compute_mfcc(audio)    
             self._compute_zcr(audio)
+            self._compute_energy(audio)
             
     def _compute_mfcc(self, audio):
         # MFCC computation with default settings (2048 FFT window length, 512 hop length, 128 bands)
@@ -66,6 +67,14 @@ class Clip:
             self.zcr.append(np.mean(0.5 * np.abs(np.diff(np.sign(frame)))))
 
         self.zcr = np.asarray(self.zcr)
+    
+    def _compute_energy(self, audio):
+        self.energy = []
+        frames = int(np.ceil(len(audio.data) / 1000.0 * Clip.RATE / Clip.FRAME))
+        
+        for i in range(0, frames):
+            frame = Clip._get_frame(audio, i)
+            self.energy.append(sum((frame**2)))
             
     @classmethod
     def _get_frame(cls, audio, index):
