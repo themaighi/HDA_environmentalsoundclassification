@@ -22,14 +22,43 @@ def general_processing(dt):
 def bayes_classification_processing(dt):
     mfcc_average_list = []
     mfcc_std_list = []
+    zcr_average_list = []
+    zcr_std_list = []
+    energy_average_list = []
+    energy_std_list = []
+    energy_delta_average_list = []
+    energy_delta_std_list = []
+    delta_average_list = []
+    delta_std_list = []
+
+
     for i in range(dt.shape[0]):
         mfcc_average_list.append(np.mean(dt['audio'][i].mfcc, axis=0))
         mfcc_std_list.append(np.std(dt['audio'][i].mfcc, axis=0))
+        zcr_average_list.append(np.mean(dt['audio'][i].zcr, axis=0))
+        zcr_std_list.append(np.std(dt['audio'][i].zcr, axis=0))
+        energy_average_list.append(np.mean(dt['audio'][i].energy, axis=0))
+        energy_std_list.append(np.std(dt['audio'][i].energy, axis=0))
+        energy_delta_average_list.append(np.mean(dt['audio'][i].energy_delta, axis=0))
+        energy_delta_std_list.append(np.std(dt['audio'][i].energy_delta, axis=0))
+        delta_average_list.append(np.mean(dt['audio'][i].delta, axis=0))
+        delta_std_list.append(np.std(dt['audio'][i].delta, axis=0))
 
     avg_mfcc_dt = pd.DataFrame(mfcc_average_list, columns=['mfcc_avg_' + str(i) for i in range(mfcc_average_list[0].shape[0])]) 
-    std_mfcc_dt = pd.DataFrame(mfcc_std_list, columns=['mfcc_avg_' + str(i) for i in range(mfcc_average_list[0].shape[0])]) 
+    std_mfcc_dt = pd.DataFrame(mfcc_std_list, columns=['mfcc_std_' + str(i) for i in range(mfcc_average_list[0].shape[0])])
+    avg_zcr_dt = pd.DataFrame(zcr_average_list, columns=['zcr_avg']) 
+    std_zcr_dt = pd.DataFrame(zcr_std_list, columns=['zcr_std']) 
+    avg_energy_dt = pd.DataFrame(energy_average_list, columns=['energy_avg']) 
+    std_energy_dt = pd.DataFrame(energy_std_list, columns=['energy_std']) 
+    avg_energy_delta_dt = pd.DataFrame(energy_delta_average_list, columns=['delta_energy_avg']) 
+    std_energy_delta_dt = pd.DataFrame(energy_delta_std_list, columns=['delta_energy_std'])
+    avg_delta_dt = pd.DataFrame(delta_average_list, columns=['delta_mfcc_avg_' + str(i) for i in range(delta_average_list[0].shape[0])]) 
+    std_delta_dt = pd.DataFrame(delta_std_list, columns=['delta_mfcc_std_' + str(i) for i in range(mfcc_average_list[0].shape[0])])
 
-    X = pd.concat([avg_mfcc_dt, std_mfcc_dt], axis=1)
+
+    X = pd.concat([avg_mfcc_dt, std_mfcc_dt, avg_zcr_dt, std_zcr_dt,
+                    avg_energy_dt, std_energy_dt, avg_energy_delta_dt,
+                    std_energy_delta_dt, avg_delta_dt, std_delta_dt], axis=1)
     y = dt['category']
 
     return X, y
@@ -39,4 +68,5 @@ if __name__ == '__main__':
     path = 'data/imported_audio.pkl'
     dt = pd.read_pickle(path)
     dt = dt[dt.esc10].reset_index()
-    general_processing(dt)
+    dt = general_processing(dt)
+    bayes_classification_processing(dt)

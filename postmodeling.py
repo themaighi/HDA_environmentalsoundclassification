@@ -22,8 +22,24 @@ def recall_plot(model_dict):
 def accuracy_plot(model_dict):
     return NotImplemented
 
-def probability_overview(model_dict):
-    return NotImplemented
+def probability_overview(model, figsize=(18, 8)):
+
+    y_proba = model['y_proba']
+    y_true = model['y_true']
+    classes = model['model'].classes_
+
+    prob_dt = pd.DataFrame(y_proba, columns=classes)
+    prob_dt['y_true'] = y_true.reset_index(drop=True)
+
+    fig, axs = plt.subplots(len(prob_dt.y_true.unique()), 1, figsize=figsize)
+    ax_flatten = axs.flatten()
+    for i, category in enumerate(prob_dt.y_true.unique()):
+        plot_dt = prob_dt[prob_dt.y_true == category].copy()
+        plot_dt.boxplot(ax=ax_flatten[i])
+        ax_flatten[i].title.set_text(category)
+    
+    plt.tight_layout()
+
 
 
 if __name__ == '__main__':
@@ -37,5 +53,6 @@ if __name__ == '__main__':
     model_dict = {'rf1': model,
                 'rf2': model}
     precision_plot(model_dict)
+    probability_overview(model_dict)
 
 
