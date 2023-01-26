@@ -64,9 +64,30 @@ def bayes_classification_processing(dt):
     return X, y
 
 
+def rnn_classification_processing(dt):
+    ##  I need to use numerical values for the categories, but I should use a predefined cetegory values
+    
+    X = []
+    for i in range(dt.shape[0]):
+
+        # X.append(np.concatenate([dt.audio[i].mfcc,
+        #                 dt.audio[i].zcr.reshape(-1,1),
+        #                 np.array(dt.audio[i].energy).reshape(-1,1),
+        #                 np.array(dt.audio[i].energy_delta).reshape(-1,1),
+        #                 dt.audio[i].delta], axis=1))
+        X.append(dt.audio[i].logamplitude.transpose())
+
+
+    X = np.array(X)
+    y = dt['category']
+
+    return X, y
+
+
 if __name__ == '__main__':
     path = 'data/imported_audio.pkl'
     dt = pd.read_pickle(path)
     dt = dt[dt.esc10].reset_index()
     dt = general_processing(dt)
-    bayes_classification_processing(dt)
+    # bayes_classification_processing(dt)
+    rnn_classification_processing(dt)

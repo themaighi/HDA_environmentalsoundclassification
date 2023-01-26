@@ -22,11 +22,11 @@ def recall_plot(model_dict):
 def accuracy_plot(model_dict):
     return NotImplemented
 
-def probability_overview(model, figsize=(18, 8)):
+def probability_overview(model, classes, figsize=(18, 8)):
 
     y_proba = model['y_proba']
     y_true = model['y_true']
-    classes = model['model'].classes_
+
 
     prob_dt = pd.DataFrame(y_proba, columns=classes)
     prob_dt['y_true'] = y_true.reset_index(drop=True)
