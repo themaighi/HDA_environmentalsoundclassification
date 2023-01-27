@@ -69,13 +69,18 @@ def rnn_classification_processing(dt):
     
     X = []
     for i in range(dt.shape[0]):
+        
 
+        X.append(np.concatenate([dt.audio[i].logamplitude.transpose()[:,:13],
+                        dt.audio[i].zcr.reshape(-1,1),
+                        dt.audio[i].melspectrogram_power1.transpose()[:,:13],
+                        dt.audio[i].delta[:,:13]], axis=1))
         # X.append(np.concatenate([dt.audio[i].mfcc,
         #                 dt.audio[i].zcr.reshape(-1,1),
         #                 np.array(dt.audio[i].energy).reshape(-1,1),
         #                 np.array(dt.audio[i].energy_delta).reshape(-1,1),
         #                 dt.audio[i].delta], axis=1))
-        X.append(dt.audio[i].logamplitude.transpose())
+        # X.append(dt.audio[i].mfcc)
 
 
     X = np.array(X)

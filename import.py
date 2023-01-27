@@ -33,18 +33,18 @@ def load_dataset(path):
         print(f'---------------{directory}--------------')
         list_clips = []
         list_clips.append(Clip('{0}/{1}'.format(path, directory)))
-        for i in range(5):
-            list_clips.append(Clip('{0}/{1}'.format(path, directory),
-                                timedelay={'shift_seconds': 2,
-                                            'direction': 'both'}))
-        for i in range(5):
-            list_clips.append(Clip('{0}/{1}'.format(path, directory),
-                                pitchshift={'pitch_range_low': -4,
-                                            'pitch_range_high': 4}))
+        # for i in range(5):
+        #     list_clips.append(Clip('{0}/{1}'.format(path, directory),
+        #                         timedelay={'shift_seconds': 2,
+        #                                     'direction': 'both'}))
+        # for i in range(5):
+        #     list_clips.append(Clip('{0}/{1}'.format(path, directory),
+        #                         pitchshift={'pitch_range_low': -4,
+        #                                     'pitch_range_high': 4}))
         
-        for i in range(5):
-            list_clips.append(Clip('{0}/{1}'.format(path, directory),
-                                speed_change={'speed_factor': 2}))
+        # for i in range(5):
+        #     list_clips.append(Clip('{0}/{1}'.format(path, directory),
+        #                         speed_change={'speed_factor': 2}))
         clips[directory] = list_clips
 
     print('All {0} recordings loaded.'.format(path))            
@@ -52,7 +52,7 @@ def load_dataset(path):
     return clips
 
 def save_data(dt, path='data/imported_audio.pkl'):
-    output = pd.DataFrame(dt).melt(var_name='filename', value_name='audio')
+    output = pd.DataFrame(dt, index=[0]).melt(var_name='filename', value_name='audio')
     reference_table = pd.read_csv('ESC-50/meta/esc50.csv')
     output = output.merge(reference_table, on='filename', how='left')
     output.to_pickle(path)

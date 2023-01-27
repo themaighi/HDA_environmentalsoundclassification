@@ -15,7 +15,8 @@ import numpy as np
 ## Always use stratification when you sample 
 ## Normalize the input before adding them
 ## Add noise to the input
-
+## Add hyperparameter tuning for the random forest
+## Add k-fold estimation? Maybe not
 
 def random_forest_model(X, y, variables=None):
     
@@ -42,6 +43,11 @@ def rnn_model(X, y):
     le = OneHotEncoder()
     y_encoded = le.fit_transform(y.values.reshape(-1,1)).toarray()
 
+    # for i in range(X.shape[0]):
+    #     mu = np.mean(X[i,:,:])
+    #     std = np.std(X[i,:,:])
+    #     X[i,:,:] = (X[i,:,:] - mu)/std
+
     X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.25, random_state=123, stratify=y_encoded)
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=123, stratify=y_train)
 
@@ -50,21 +56,25 @@ def rnn_model(X, y):
     X_test = minmax_sc.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
     X_val = minmax_sc.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
 
-    input_shape=(431,128)
+    input_shape=(431,40)
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.LSTM(248, input_shape=input_shape))
+    model.add(tf.keras.layers.LSTM(128, return_sequences=True, input_shape=input_shape))
     model.add(tf.keras.layers.Dropout(0.4))
-    model.add(tf.keras.layers.Dense(128, activation='relu'))
-    model.add(tf.keras.layers.Dense(64, activation='relu'))
-    model.add(tf.keras.layers.Dropout(0.5))
+    model.add(tf.keras.layers.LSTM(64, return_sequences=False, input_shape=input_shape))
+    model.add(tf.keras.layers.Dropout(0.4))
     model.add(tf.keras.layers.Dense(24, activation='relu'))
-    model.add(tf.keras.layers.Dropout(0.5))
+    model.add(tf.keras.layers.Dropout(0.4))
+    # model.add(tf.keras.layers.Dense(128, activation='relu'))
+    # model.add(tf.keras.layers.Dense(64, activation='relu'))
+    # model.add(tf.keras.layers.Dropout(0.5))
+    # model.add(tf.keras.layers.Dense(24, activation='relu'))
+    # model.add(tf.keras.layers.Dropout(0.5))
     model.add(tf.keras.layers.Dense(10, activation='softmax'))
     model.summary()
  
-    model.compile(optimizer='adam',loss='CategoricalCrossentropy',metrics=['accuracy'])
-    history = model.fit(X_train, y_train, epochs=100, batch_size=50, 
-                    validation_data=(X_val, y_val), shuffle=False)
+    model.compile(optimizer='adam',loss='CategoricalCrossentropy',metrics=['acc'])
+    history = model.fit(np.array(X_train), y_train, epochs=100, batch_size=50, 
+                    validation_data=(np.array(X_val), y_val), shuffle=False)
 
     predict_proba = model.predict(X_test)
     y_predicted = np.zeros(predict_proba.shape)

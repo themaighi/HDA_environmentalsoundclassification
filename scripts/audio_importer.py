@@ -65,9 +65,10 @@ class Clip:
         ## We can make this to be an input, so that we can always try different transformations 
         # the 431 is the length of the series divided by the hop length 220500/512
         # The 128 is the amount of filters that are used, so there is a good approximation of the high frequency
-        self.melspectrogram = librosa.feature.melspectrogram(audio.raw, sr=Clip.RATE, hop_length=Clip.FRAME)
+        self.melspectrogram_power1 = librosa.feature.melspectrogram(audio.raw, sr=Clip.RATE, hop_length=Clip.FRAME, power=1, n_mels=20)
+        self.melspectrogram = librosa.feature.melspectrogram(audio.raw, sr=Clip.RATE, hop_length=Clip.FRAME, power=2)
         self.logamplitude = librosa.amplitude_to_db(self.melspectrogram)
-        self.mfcc = librosa.feature.mfcc(S=self.logamplitude, n_mfcc=13).transpose()
+        self.mfcc = librosa.feature.mfcc(S=self.logamplitude, n_mfcc=128).transpose()
             
     def _compute_zcr(self, audio):
         # Zero-crossing rate
