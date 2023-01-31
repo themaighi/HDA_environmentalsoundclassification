@@ -11,6 +11,7 @@ import librosa
 from scripts.audio_importer import Clip
 import os
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 def download_dataset(name):
@@ -27,35 +28,57 @@ def download_dataset(name):
 
 def load_dataset(path):
     """Load all dataset recordings into a nested list."""
-    clips = {}
     
-    for directory in sorted(os.listdir('{0}/'.format(path))):
+    
+    reference_table = pd.read_csv('ESC-50/meta/esc50.csv')
+    reference_table = reference_table[reference_table.esc10]
+
+    X_train, X_test = train_test_split(reference_table['filename'].values, test_size=0.25, stratify=reference_table['category'].values)
+    
+    train_clips = {}
+    for directory in X_train:
         print(f'---------------{directory}--------------')
         list_clips = []
         list_clips.append(Clip('{0}/{1}'.format(path, directory)))
-        # for i in range(5):
-        #     list_clips.append(Clip('{0}/{1}'.format(path, directory),
-        #                         timedelay={'shift_seconds': 2,
-        #                                     'direction': 'both'}))
-        # for i in range(5):
-        #     list_clips.append(Clip('{0}/{1}'.format(path, directory),
-        #                         pitchshift={'pitch_range_low': -4,
-        #                                     'pitch_range_high': 4}))
+        for i in range(5):
+            list_clips.append(Clip('{0}/{1}'.format(path, directory),
+                                timedelay={'shift_seconds': 2,
+                                            'direction': 'both'}))
+        for i in range(5):
+            list_clips.append(Clip('{0}/{1}'.format(path, directory),
+                                pitchshift={'pitch_range_low': -2,
+                                            'pitch_range_high': 2}))
         
-        # for i in range(5):
-        #     list_clips.append(Clip('{0}/{1}'.format(path, directory),
-        #                         speed_change={'speed_factor': 2}))
-        clips[directory] = list_clips
+        for i in range(5):
+            list_clips.append(Clip('{0}/{1}'.format(path, directory),
+                                speed_change={'speed_factor': 2}))
+        train_clips[directory] = list_clips
 
-    print('All {0} recordings loaded.'.format(path))            
+    test_clips = {}
+
+    for directory in X_test:
+        print(f'---------------{directory}--------------')
+        list_clips = []
+        list_clips.append(Clip('{0}/{1}'.format(path, directory)))
+        test_clips[directory] = list_clips
+
+    print('All {0} recordings loaded.'.format(path))  
+
+    try:
+        train_dt = pd.DataFrame(train_clips, index=[0]).melt(var_name='filename', value_name='audio')
+    except:
+        train_dt = pd.DataFrame(train_clips).melt(var_name='filename', value_name='audio')
+
+    test_dt = pd.DataFrame(test_clips, index=[0]).melt(var_name='filename', value_name='audio')          
+    train_dt['train'] = 1
+    test_dt['train'] = 0
+    dt = pd.concat([train_dt, test_dt])
+    dt = dt.merge(reference_table, on='filename', how='left')
     
-    return clips
+    return dt
 
 def save_data(dt, path='data/imported_audio.pkl'):
-    output = pd.DataFrame(dt, index=[0]).melt(var_name='filename', value_name='audio')
-    reference_table = pd.read_csv('ESC-50/meta/esc50.csv')
-    output = output.merge(reference_table, on='filename', how='left')
-    output.to_pickle(path)
+    dt.to_pickle(path)
 
 
 if __name__ == '__main__':
