@@ -34,7 +34,7 @@ class Clip:
             del self.data
             del self.raw
         
-    def __init__(self, filename):
+    def __init__(self, filename, pitchshift=None, timedelay=None, noise=None, speed_change=None):
         self.filename = os.path.basename(filename)
         self.path = os.path.abspath(filename)        
         self.directory = os.path.dirname(self.path)
@@ -43,6 +43,14 @@ class Clip:
         self.audio = Clip.Audio(self.path)
         
         with self.audio as audio:
+            if pitchshift != None:
+                self._pitch_shift(pitchshift)
+            if timedelay != None:
+                self._shift_time(timedelay)
+            if noise != None:
+                NotImplemented
+            if speed_change != None:
+                self._speed_manipulation(speed_change)
             self._compute_mfcc(audio)    
             self._compute_zcr(audio)
             self._compute_energy(audio)
@@ -57,9 +65,10 @@ class Clip:
         ## We can make this to be an input, so that we can always try different transformations 
         # the 431 is the length of the series divided by the hop length 220500/512
         # The 128 is the amount of filters that are used, so there is a good approximation of the high frequency
-        self.melspectrogram = librosa.feature.melspectrogram(audio.raw, sr=Clip.RATE, hop_length=Clip.FRAME)
+        self.melspectrogram_power1 = librosa.feature.melspectrogram(audio.raw, sr=Clip.RATE, hop_length=Clip.FRAME, power=1, n_mels=20)
+        self.melspectrogram = librosa.feature.melspectrogram(audio.raw, sr=Clip.RATE, hop_length=Clip.FRAME, power=2)
         self.logamplitude = librosa.amplitude_to_db(self.melspectrogram)
-        self.mfcc = librosa.feature.mfcc(S=self.logamplitude, n_mfcc=13).transpose()
+        self.mfcc = librosa.feature.mfcc(S=self.logamplitude, n_mfcc=128).transpose()
             
     def _compute_zcr(self, audio):
         # Zero-crossing rate
@@ -80,6 +89,39 @@ class Clip:
             frame = Clip._get_frame(audio, i)
             self.energy.append(sum((frame**2)))
     
+    def _shift_time(self, timedelay):
+        shift = np.random.randint(Clip.RATE * timedelay['shift_seconds'])
+        if timedelay['direction'] == 'right':
+            shift = -shift
+        elif timedelay['direction'] == 'both':
+            direction = np.random.randint(0, 2)
+            if direction == 1:
+                shift = -shift
+        augmented_data = np.roll(self.audio.raw, shift)
+        # Set to silence for heading/ tailing
+        if shift > 0:
+            augmented_data[:shift] = 0
+        else:
+            augmented_data[shift:] = 0
+        self.audio.raw = augmented_data
+
+    def _pitch_shift(self,pitchshift):
+        pitch_factor = np.random.uniform(pitchshift['pitch_range_low'], pitchshift['pitch_range_high'])
+        self.audio.raw = librosa.effects.pitch_shift(self.audio.raw, sr=Clip.RATE, n_steps=pitch_factor)
+
+    def _speed_manipulation(self, speed_change):
+        speed_shift = np.random.uniform(1, speed_change['speed_factor'])
+        random_choice = np.random.binomial(1,p=0.5)
+        if random_choice == 1:
+            speed_factor = 1/speed_shift
+        if random_choice == 0:
+            speed_factor = speed_shift
+
+        augmented_data = librosa.effects.time_stretch(self.audio.raw, rate=speed_factor)
+        augmented_data = librosa.util.fix_length(augmented_data, size=self.audio.raw.shape[0])
+        self.audio.raw = augmented_data
+
+
     def _compute_delta(self, mfcc):
         self.delta = librosa.feature.delta(mfcc.transpose(), order=1).transpose()
     

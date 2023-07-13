@@ -1,6 +1,7 @@
 import pandas as pd
 import pandas as pd
 import numpy as np
+from scripts.audio_importer import Clip
 
 
 def general_processing(dt):
@@ -20,6 +21,7 @@ def general_processing(dt):
 
 
 def bayes_classification_processing(dt):
+    ## Use other distribution moments (median, 3rd moment)
     mfcc_average_list = []
     mfcc_std_list = []
     zcr_average_list = []
@@ -33,16 +35,16 @@ def bayes_classification_processing(dt):
 
 
     for i in range(dt.shape[0]):
-        mfcc_average_list.append(np.mean(dt['audio'][i].mfcc, axis=0))
-        mfcc_std_list.append(np.std(dt['audio'][i].mfcc, axis=0))
+        mfcc_average_list.append(np.mean(dt['audio'][i].mfcc[:,1:13], axis=0))
+        mfcc_std_list.append(np.std(dt['audio'][i].mfcc[:,1:13], axis=0))
         zcr_average_list.append(np.mean(dt['audio'][i].zcr, axis=0))
         zcr_std_list.append(np.std(dt['audio'][i].zcr, axis=0))
         energy_average_list.append(np.mean(dt['audio'][i].energy, axis=0))
         energy_std_list.append(np.std(dt['audio'][i].energy, axis=0))
         energy_delta_average_list.append(np.mean(dt['audio'][i].energy_delta, axis=0))
         energy_delta_std_list.append(np.std(dt['audio'][i].energy_delta, axis=0))
-        delta_average_list.append(np.mean(dt['audio'][i].delta, axis=0))
-        delta_std_list.append(np.std(dt['audio'][i].delta, axis=0))
+        delta_average_list.append(np.mean(dt['audio'][i].delta[:,1:13], axis=0))
+        delta_std_list.append(np.std(dt['audio'][i].delta[:,1:13], axis=0))
 
     avg_mfcc_dt = pd.DataFrame(mfcc_average_list, columns=['mfcc_avg_' + str(i) for i in range(mfcc_average_list[0].shape[0])]) 
     std_mfcc_dt = pd.DataFrame(mfcc_std_list, columns=['mfcc_std_' + str(i) for i in range(mfcc_average_list[0].shape[0])])
@@ -64,9 +66,34 @@ def bayes_classification_processing(dt):
     return X, y
 
 
+def rnn_classification_processing(dt):
+    ##  I need to use numerical values for the categories, but I should use a predefined cetegory values
+    
+    X = []
+    for i in range(dt.shape[0]):
+        
+
+        X.append(np.concatenate([dt.audio[i].mfcc[:,1:13],
+                        dt.audio[i].zcr.reshape(-1,1),
+                        np.array(dt.audio[i].energy).reshape(-1,1)], axis=1))
+        # X.append(np.concatenate([dt.audio[i].mfcc,
+        #                 dt.audio[i].zcr.reshape(-1,1),
+        #                 np.array(dt.audio[i].energy).reshape(-1,1),
+        #                 np.array(dt.audio[i].energy_delta).reshape(-1,1),
+        #                 dt.audio[i].delta], axis=1))
+        # X.append(dt.audio[i].mfcc)
+
+
+    X = np.array(X)
+    y = dt['category']
+
+    return X, y
+
+
 if __name__ == '__main__':
     path = 'data/imported_audio.pkl'
     dt = pd.read_pickle(path)
     dt = dt[dt.esc10].reset_index()
     dt = general_processing(dt)
-    bayes_classification_processing(dt)
+    # bayes_classification_processing(dt)
+    rnn_classification_processing(dt)
