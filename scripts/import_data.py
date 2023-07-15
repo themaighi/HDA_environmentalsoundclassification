@@ -40,7 +40,7 @@ def load_dataset(path, augmentation=False):
     """Load all dataset recordings into a nested list."""
     
     
-    reference_table = pd.read_csv('ESC-50/meta/esc50.csv')
+    reference_table = pd.read_csv('ESC-50/ESC-50-master/meta/esc50.csv')
     reference_table = reference_table[reference_table.esc10]
 
     X_train, X_test = train_test_split(reference_table['filename'].values, test_size=0.25, stratify=reference_table['category'].values)
@@ -93,6 +93,6 @@ def save_data(dt, path='data/imported_audio_original.pkl'):
 
 
 if __name__ == '__main__':
-    download_dataset('ESC-50')
-    dt = load_dataset('ESC-50/audio/')
+    # download_dataset('ESC-50')s
+    dt = load_dataset('ESC-50/ESC-50-master/audio/')
     save_data(dt)
