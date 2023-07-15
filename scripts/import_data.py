@@ -20,13 +20,15 @@ def download_dataset(name):
     """Download the dataset into current working directory."""
     if not os.path.exists(name):
         os.makedirs(name, exist_ok=True)
-        request = requests.get('https://github.com/karoldvl/{0}/archive/master.zip'.format(name), timeout=10, stream=True)
-        with open('{0}/{0}.zip'.format(name), 'wb') as fh:
-            # Walk through the request response in chunks of 1024 * 1024 bytes, so 1MiB
-            for i, chunk in enumerate(request.iter_content(1024 * 1024)):
-                print(f'Downloading part {str(i)} ---------')
-                # Write the chunk to the file
-                fh.write(chunk)
+        urllib.request.urlretrieve('https://github.com/karoldvl/{0}/archive/master.zip'.format(name), '{0}/{0}.zip'.format(name))
+
+        # request = requests.get('https://github.com/karoldvl/{0}/archive/master.zip'.format(name), timeout=10, stream=True)
+        # with open('{0}/{0}.zip'.format(name), 'wb') as fh:
+        #     # Walk through the request response in chunks of 1024 * 1024 bytes, so 1MiB
+        #     for i, chunk in enumerate(request.iter_content(1024 * 1024)):
+        #         print(f'Downloading part {str(i)} ---------')
+        #         # Write the chunk to the file
+        #         fh.write(chunk)
 
         with zipfile.ZipFile('{0}/{0}.zip'.format(name)) as package:
             package.extractall('{0}/'.format(name))
