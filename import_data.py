@@ -26,7 +26,7 @@ def download_dataset(name):
         os.unlink('{0}/{0}.zip'.format(name))   
 
 
-def load_dataset(path):
+def load_dataset(path, augmentation=False):
     """Load all dataset recordings into a nested list."""
     
     
@@ -40,18 +40,19 @@ def load_dataset(path):
         print(f'---------------{directory}--------------')
         list_clips = []
         list_clips.append(Clip('{0}/{1}'.format(path, directory)))
-        for i in range(5):
-            list_clips.append(Clip('{0}/{1}'.format(path, directory),
-                                timedelay={'shift_seconds': 2,
-                                            'direction': 'both'}))
-        for i in range(5):
-            list_clips.append(Clip('{0}/{1}'.format(path, directory),
-                                pitchshift={'pitch_range_low': -2,
-                                            'pitch_range_high': 2}))
-        
-        for i in range(5):
-            list_clips.append(Clip('{0}/{1}'.format(path, directory),
-                                speed_change={'speed_factor': 2}))
+        if augmentation:
+            for i in range(5):
+                list_clips.append(Clip('{0}/{1}'.format(path, directory),
+                                    timedelay={'shift_seconds': 2,
+                                                'direction': 'both'}))
+            for i in range(5):
+                list_clips.append(Clip('{0}/{1}'.format(path, directory),
+                                    pitchshift={'pitch_range_low': -2,
+                                                'pitch_range_high': 2}))
+            
+            for i in range(5):
+                list_clips.append(Clip('{0}/{1}'.format(path, directory),
+                                    speed_change={'speed_factor': 2}))
         train_clips[directory] = list_clips
 
     test_clips = {}
