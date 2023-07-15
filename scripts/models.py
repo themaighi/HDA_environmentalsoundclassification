@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from processing import bayes_classification_processing, general_processing, rnn_classification_processing
+from scripts.processing import bayes_classification_processing, general_processing, rnn_classification_processing
 import pandas as pd
 from scripts.audio_importer import Clip
 from sklearn.metrics import confusion_matrix

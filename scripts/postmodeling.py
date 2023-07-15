@@ -43,8 +43,8 @@ def probability_overview(model, classes, figsize=(18, 8)):
 
 
 if __name__ == '__main__':
-    from models import random_forest_model
-    from processing import general_processing, bayes_classification_processing
+    from scripts.models import random_forest_model
+    from scripts.processing import general_processing, bayes_classification_processing
     dt = pd.read_pickle('data/imported_audio_original.pkl')
     dt = dt[dt.esc10].reset_index()
     dt = general_processing(dt)
