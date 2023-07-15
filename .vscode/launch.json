@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            // "terminal.integrated.env.osx": {"PYTHONPATH": "${workspaceFolder}"},
+            // "env": {"PYTHONPATH": "${workspaceFolder}"},
+            "envFile":"${workspaceFolder}/.env",
+            "stopOnEntry": false,
+        }
+    ]
+}
